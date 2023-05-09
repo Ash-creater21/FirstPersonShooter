@@ -1,25 +1,31 @@
 using UnityEngine;
+using Unity.Netcode; 
 
 [RequireComponent(typeof(PlayerMotor))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour 
 {
     [SerializeField]
     private float speed = 5f ; 
-
-    [SerializeField] 
+    [SerializeField]
+    
     private float lookSensitivity = 3f ; 
 
     private PlayerMotor motor ; 
 
     private void Start()
     {
+       
         // no error handling is required 
         // as we have marked it Player motor required on this Component 
         motor = GetComponent<PlayerMotor>() ; 
+
     }
 
     private void Update() 
     {
+        
+        if(!IsOwner) return ; 
+
         // Calculate the movement velocity as a 3D vector 
         float _xMov = Input.GetAxisRaw("Horizontal");
         // xMov would Return values between 1 and -1 
@@ -47,7 +53,7 @@ public class PlayerController : MonoBehaviour
         // calculate rotaton as 3d Vector 
         // {turning around}
 
-        float yRot = Input.GetAxisRaw("Mouse X") ; 
+        float yRot = Input.GetAxisRaw("Mouse X"); 
         Vector3 _rotation = new Vector3(0f,yRot,0f) * lookSensitivity;
 
         // we have rotated the object along y axis so , that it can move 
@@ -55,6 +61,21 @@ public class PlayerController : MonoBehaviour
 
         // Apply Rotation 
         motor.Rotate(_rotation); 
+
+          // calculate Camera rotaton as 3d Vector 
+        // {turning around}
+        //  here we don't want any player rotation 
+
+        float xRot = Input.GetAxisRaw("Mouse Y"); 
+        Vector3 _Camerarotation = new Vector3(xRot,0f,0f) * lookSensitivity;
+
+        // we have rotated the object along y axis so , that it can move 
+        // in xz plane 
+
+        // Apply Rotation 
+        motor.RotateCamera(_Camerarotation); 
+
+
 
         
     }
